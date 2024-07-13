@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Text Generator</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            font-family: Arial, sans-serif;
+        }
+        #controls {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        #input, #colorInput {
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        #input {
+            width: 200px;
+        }
+        #colorInput {
+            width: 120px;
+        }
+    </style>
+</head>
+<body>
+    <div id="controls">
+        <input id="input" type="text" placeholder="Enter text">
+        <input id="colorInput" type="color" value="#00ff00" placeholder="Change color">
+
+     
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/examples/fonts/helvetiker_regular.typeface.json"></script>
+    <script>
+        let scene, camera, renderer, textMesh, textMaterial;
+
+        function init() {
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            renderer = new THREE.WebGLRenderer();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.body.appendChild(renderer.domElement);
+
+            const light1 = new THREE.DirectionalLight(0xffffff, 1);
+            light1.position.set(1, 1, 1);
+            scene.add(light1);
+
+            const light2 = new THREE.DirectionalLight(0xffffff, 0.5);
+            light2.position.set(-1, -1, -1);
+            scene.add(light2);
+
+            camera.position.z = 5;
+
+            document.getElementById('input').addEventListener('input', updateText);
+            document.getElementById('colorInput').addEventListener('input', updateColor);
+
+            textMaterial = new THREE.MeshPhongMaterial({ color: 0x00ff00 });
+        }
+
+        function updateText(event) {
+            const loader = new THREE.FontLoader();
+            loader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function(font) {
+                const geometry = new THREE.TextGeometry(event.target.value, {
+                    font: font,
+                    size: 0.5,
+                    height: 0.1,
+                    curveSegments: 12,
+                    bevelEnabled: true,
+                    bevelThickness: 0.03,
+                    bevelSize: 0.02,
+                    bevelSegments: 5
+                });
+                if (textMesh) scene.remove(textMesh);
+                textMesh = new THREE.Mesh(geometry, textMaterial);
+                scene.add(textMesh);
+            });
+        }
+
+        function updateColor(event) {
+            if (textMaterial) {
+                textMaterial.color.set(event.target.value);
+            }
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            if (textMesh) {
+                textMesh.rotation.y += 0.01;
+                textMesh.rotation.x += 0.005;
+                textMesh.rotation.z += 0.003;
+            }
+            renderer.render(scene, camera);
+        }
+
+        init();
+        animate();
+    </script>
+</body>
+</html>
